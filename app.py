@@ -13,7 +13,19 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize PaddleOCR once (CPU mode, English; angle_cls=False speeds up simple text)
-ocr = PaddleOCR(use_angle_cls=False, use_gpu=False, lang='en')
+
+
+# create /tmp/ocr_models directory if it doesn't exist
+os.makedirs('/tmp/ocr_models', exist_ok=True)
+
+ocr = PaddleOCR(
+    use_angle_cls=False,
+    use_gpu=False,
+    lang='en',
+    det_model_dir='/tmp/ocr_models/det',
+    rec_model_dir='/tmp/ocr_models/rec',
+    cls_model_dir='/tmp/ocr_models/cls'
+)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
