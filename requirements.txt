@@ -34,3 +34,4 @@ click
 jinja2
 markupsafe
 blinker
+gunicorn
