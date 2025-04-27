@@ -1,23 +1,36 @@
-# flask==3.0.2
-# paddleocr==2.7.0.2
-# paddlepaddle==2.5.2
-# opencv-python-headless==4.8.1.78
-# shapely==2.0.1
-# scikit-image==0.18.3
-# imgaug==0.4.0
-# pyclipper
-# lmdb
-# tqdm
-# numpy==1.24.3
-# visualdl
-# python-Levenshtein
-# werkzeug==2.2.3
-# markupsafe
-# click
-# blinker
-flask==2.2.5
-paddleocr==2.7.0.3
-paddlepaddle==2.5.2  # Updated to compatible version
-opencv-python-headless==4.8.1.78
-numpy==1.26.0
-pyclipper==1.3.0.post6
+# Flask==3.1.0  
+# Werkzeug==2.2.3  
+# Jinja2==3.0.3  
+# MarkupSafe==2.1.1  
+# Click==8.1.7  
+# Blinker==1.6.2  
+
+# numpy==1.26.4  
+# paddlepaddle==3.0.0  
+# paddleocr==2.10.0  
+
+# opencv-python-headless==4.11.0.86  
+# opencv-contrib-python-headless==4.11.0.86  
+
+# scikit-image==0.20.0  
+# shapely==2.0.1  
+# pyclipper==1.3.0  
+# lmdb==1.4.1  
+# tqdm==4.66.1  
+# rapidfuzz==2.19.0  
+# cython==0.29.36  
+# Pillow==10.0.1  
+# pyyaml==6.0  
+# requests==2.31.0  
+# albumentations==1.3.1  
+# albucore==0.1.2  
+# packaging==23.1  
+Flask
+paddleocr>=2.0.1
+paddlepaddle
+opencv-python-headless
+numpy
+click
+jinja2
+markupsafe
+blinker
