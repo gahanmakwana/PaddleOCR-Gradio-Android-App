@@ -1,4 +1,4 @@
-body {
+/* body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #74ebd5, #ACB6E5);
     margin: 0;
@@ -96,10 +96,67 @@ button:hover {
   border: 1px solid #ddd;
 }
 #spinner {
-  /* Center the spinner overlay */
+   
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
+} */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
 }
+
+.container {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  max-width: 600px;
+  width: 100%;
+  animation: fadeIn 1s ease-in;
+}
+
+h1 { margin-bottom: 20px; color: #333; font-weight: 600; }
+
+.upload-form { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 15px; 
+}
+
+#spinner {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.preview img, #result-img {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+.output, #extracted-text {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: left;
+  white-space: pre-wrap;
+  margin-top: 10px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+

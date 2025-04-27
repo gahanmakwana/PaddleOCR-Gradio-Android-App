@@ -1,50 +1,51 @@
-from flask import Flask, request, render_template, redirect
+import os
+from flask import Flask, render_template, request, send_from_directory
 from werkzeug.utils import secure_filename
 from paddleocr import PaddleOCR
-import os
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'static/uploads'
+
+# Configuration
+UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Allow only certain image file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Initialize PaddleOCR once (loads models)
-ocr_engine = PaddleOCR(use_angle_cls=True, lang='en')
+# Initialize OCR model
+ocr = PaddleOCR(use_angle_cls=True, lang='en')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    extracted_text = ''
     filename = None
+    extracted_text = None
 
     if request.method == 'POST':
-        # Check if an image file was submitted
-        if 'image' not in request.files:
-            return redirect(request.url)
-        file = request.files['image']
-        if file and allowed_file(file.filename):
-            # Secure the filename and save to upload folder
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+        file = request.files.get('image')
+        if not file or file.filename == '' or not allowed_file(file.filename):
+            return render_template('index.html', error="Please upload a valid image file (png/jpg/jpeg/gif).")
 
-            # Run OCR on the uploaded image
-            result = ocr_engine.ocr(filepath, cls=True)
-            # Un-nest result if PaddleOCR returns a nested list
-            if result and isinstance(result[0], list) and len(result) == 1:
-                result = result[0]
-            # Extract recognized text lines
-            extracted_text_lines = [line[1][0] for line in result]
-            extracted_text = '\n'.join(extracted_text_lines)
+        # Save the uploaded file
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
 
-    # Render the template, passing in filename and extracted text
+        # Run OCR
+        result = ocr.ocr(filepath, cls=True)
+        # Flatten if nested
+        if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
+            result = result[0]
+        lines = [line[1][0] for line in result]
+        extracted_text = "\n".join(lines) if lines else "No text detected."
+
     return render_template('index.html', filename=filename, extracted_text=extracted_text)
 
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 if __name__ == '__main__':
-    # Bind to PORT for Render (default 10000) on all interfaces
-    port = int(os.environ.get('PORT', 10000))
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
