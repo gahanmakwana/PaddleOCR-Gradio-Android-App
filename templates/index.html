@@ -3,42 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css">
+    <title>OCR Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>OCR Application</h1>
+    <div class="container">
+        <h1>Image Text Extractor</h1>
 
-        <!-- Form to upload file -->
-        <form method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="file" class="form-label">Choose a file</label>
-                <input type="file" class="form-control" name="file" id="file" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Upload</button>
+        <!-- Upload Form -->
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            <input type="file" name="file" id="file" required>
+            <button type="submit">Upload Image</button>
         </form>
 
-        <!-- Error Message Display -->
         {% if error %}
-            <div class="alert alert-danger mt-3" role="alert">
-                {{ error }}
-            </div>
-        {% endif %}
-
-        <!-- Display OCR Result -->
-        {% if text %}
-            <h3 class="mt-4">Extracted Text:</h3>
-            <pre>{{ text }}</pre>
+            <div class="error">{{ error }}</div>
         {% endif %}
 
         {% if filename %}
-            <h4>Uploaded Image:</h4>
-            <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image" class="img-fluid mt-3">
+            <div class="preview">
+                <h2>Uploaded Image</h2>
+                <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image">
+            </div>
+        {% endif %}
+
+        {% if text %}
+            <div class="output">
+                <h2>Extracted Text</h2>
+                <p>{{ text }}</p>
+            </div>
         {% endif %}
     </div>
-
-    <!-- Optional: Bootstrap JavaScript for interaction (such as form validation) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

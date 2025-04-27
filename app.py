@@ -4,44 +4,39 @@ import os
 
 app = Flask(__name__)
 
-# Create uploads directory if it doesn't exist
+# Upload folder
 UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set the uploads folder in app config
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# Initialize the OCR model
-ocr = PaddleOCR(lang='en')
+# Initialize OCR
+ocr = PaddleOCR(use_angle_cls=True, lang='en')
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    text = None
+    filename = None
     if request.method == 'POST':
-        if 'file' not in request.files:
-            return render_template('index.html', error='No file selected')
-        
-        file = request.files['file']
-        if file.filename == '':
-            return render_template('index.html', error='No file selected')
+        file = request.files.get('file')
+        if not file or file.filename == '':
+            return render_template('index.html', error="No file selected")
 
-        if file:
-            # Save the file to uploads directory
-            img_path = os.path.join(UPLOAD_FOLDER, file.filename)
-            file.save(img_path)
-            
-            # Perform OCR
-            result = ocr.ocr(img_path)
-            
-            # Extract text from OCR result
-            text = ""
-            for line in result[0]:
-                text += line[1][0] + "\n"
-            
-            # Return the rendered template with the extracted text and image
-            return render_template('index.html', text=text, filename=file.filename)
-    
-    return render_template('index.html')
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
 
-# Serve the uploaded file (from the uploads directory)
+        # Run OCR
+        result = ocr.ocr(filepath, cls=True)
+        extracted_text = ""
+        for line in result:
+            for word_info in line:
+                extracted_text += word_info[1][0] + " "
+
+        text = extracted_text
+        filename = file.filename
+
+    return render_template('index.html', text=text, filename=filename)
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
