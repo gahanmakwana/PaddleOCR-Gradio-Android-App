@@ -46,30 +46,29 @@
 #     app.run(host='0.0.0.0', port=port)
 
 from flask import Flask, render_template, request, send_from_directory
-from paddleocr import PaddleOCR
 import os
 import time
-import logging
 
 app = Flask(__name__)
 
-# Configure minimal logging
-logging.basicConfig(level=logging.WARNING)
-
-# Upload folder
-UPLOAD_FOLDER = 'uploads'
+# Configure minimal setup
+UPLOAD_FOLDER = 'tmp_uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Lightweight OCR initialization
+# Lazy-load OCR only when needed
 def get_ocr():
+    from paddleocr import PaddleOCR
     return PaddleOCR(
         lang='en',
-        use_angle_cls=False,  # Disable angle classifier to save memory
+        use_angle_cls=False,
         use_gpu=False,
-        enable_mkldnn=True,  # CPU optimization
-        rec_batch_num=1,     # Process one line at a time
-        det_limit_side_len=480,  # Smaller image size
-        thread_num=1         # Critical for free tier
+        det_model_dir='en_PP-OCRv3_det_infer',
+        rec_model_dir='en_PP-OCRv3_rec_infer',
+        cls_model_dir='ch_ppocr_mobile_v2.0_cls_infer',
+        enable_mkldnn=True,
+        rec_batch_num=1,
+        det_limit_side_len=320,
+        thread_num=1
     )
 
 @app.route('/', methods=['GET', 'POST'])
@@ -77,39 +76,34 @@ def upload_file():
     if request.method == 'POST':
         file = request.files.get('file')
         if not file or file.filename == '':
-            return render_template('index.html', error="No file selected")
+            return render_template('index.html', error="Please select a file")
 
         try:
-            # Verify file size (<500KB)
-            file.seek(0, os.SEEK_END)
-            if file.tell() > 500000:
-                return render_template('index.html', error="File too large (max 500KB)")
+            # 300KB file size limit
+            if len(file.read()) > 300000:
+                return render_template('index.html', error="Max 300KB file size")
             file.seek(0)
 
-            # Save with timestamp
-            filename = f"{int(time.time())}_{file.filename}"
+            # Save file
+            filename = f"{int(time.time())}.jpg"
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             file.save(filepath)
 
-            # Initialize OCR per-request (avoids memory buildup)
+            # Process with OCR
             ocr = get_ocr()
-            
-            # Fast OCR with small image
-            result = ocr.ocr(filepath, cls=False)[0]  # [0] gets first batch
-            text = ' '.join([word[1][0] for word in result if len(word) >= 2])
+            result = ocr.ocr(filepath, cls=False)
+            text = ' '.join([word[1][0] for line in result[0] for word in line if len(word) >= 2])
 
-            return render_template('index.html', text=text, filename=filename)
+            # Cleanup
+            os.remove(filepath)
+            return render_template('index.html', text=text)
 
         except Exception as e:
             if os.path.exists(filepath):
                 os.remove(filepath)
-            return render_template('index.html', error=f"Error: {str(e)}")
+            return render_template('index.html', error="OCR processing failed")
 
     return render_template('index.html')
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
