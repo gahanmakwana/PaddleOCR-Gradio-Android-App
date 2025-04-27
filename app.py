@@ -9,6 +9,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+# Initialize the OCR model
 ocr = PaddleOCR(lang='en')
 
 @app.route('/', methods=['GET', 'POST'])
@@ -20,7 +21,7 @@ def upload_file():
         file = request.files['file']
         if file.filename == '':
             return render_template('index.html', error='No file selected')
-        
+
         if file:
             # Save the file to uploads directory
             img_path = os.path.join(UPLOAD_FOLDER, file.filename)
@@ -34,10 +35,12 @@ def upload_file():
             for line in result[0]:
                 text += line[1][0] + "\n"
             
+            # Return the rendered template with the extracted text and image
             return render_template('index.html', text=text, filename=file.filename)
     
     return render_template('index.html')
 
+# Serve the uploaded file
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
