@@ -1,7 +1,5 @@
 Flask>=2.0
 gunicorn
-paddleocr
-paddlepaddle==2.5.2
-opencv-python
-numpy
-Pillow
+paddlepaddle
+paddleocr>=2.0.1
+opencv-python-headless
