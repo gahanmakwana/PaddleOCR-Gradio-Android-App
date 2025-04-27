@@ -7,7 +7,7 @@ imgaug==0.4.0
 pyclipper
 lmdb
 tqdm
-numpy
+numpy==1.24.3
 visualdl
 python-Levenshtein
 opencv-contrib-python==4.5.5.62
