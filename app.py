@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 # Create uploads directory if it doesn't exist
 UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set the uploads folder in app config
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -40,7 +41,7 @@ def upload_file():
     
     return render_template('index.html')
 
-# Serve the uploaded file
+# Serve the uploaded file (from the uploads directory)
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
