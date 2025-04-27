@@ -11,3 +11,4 @@ numpy==1.24.3
 visualdl
 python-Levenshtein
 opencv-contrib-python==4.8.0.74
+werkzeug==2.2.3
