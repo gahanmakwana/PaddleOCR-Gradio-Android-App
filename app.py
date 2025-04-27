@@ -45,29 +45,20 @@
 #     port = int(os.environ.get('PORT', 5000))  # <-- IMPORTANT
 #     app.run(host='0.0.0.0', port=port)
 
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request
 import os
 import time
 
 app = Flask(__name__)
 
-# Configure minimal setup
-UPLOAD_FOLDER = 'tmp_uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Lazy-load OCR only when needed
+# Lightweight OCR loader
 def get_ocr():
     from paddleocr import PaddleOCR
     return PaddleOCR(
         lang='en',
         use_angle_cls=False,
         use_gpu=False,
-        det_model_dir='en_PP-OCRv3_det_infer',
-        rec_model_dir='en_PP-OCRv3_rec_infer',
-        cls_model_dir='ch_ppocr_mobile_v2.0_cls_infer',
-        enable_mkldnn=True,
-        rec_batch_num=1,
-        det_limit_side_len=320,
+        det_limit_side_len=480,
         thread_num=1
     )
 
@@ -79,32 +70,24 @@ def upload_file():
             return render_template('index.html', error="Please select a file")
 
         try:
-            # 300KB file size limit
-            if len(file.read()) > 300000:
+            # Verify file size
+            file.seek(0, os.SEEK_END)
+            if file.tell() > 300000:
                 return render_template('index.html', error="Max 300KB file size")
             file.seek(0)
 
-            # Save file
-            filename = f"{int(time.time())}.jpg"
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepath)
-
             # Process with OCR
             ocr = get_ocr()
-            result = ocr.ocr(filepath, cls=False)
+            result = ocr.ocr(file.stream, cls=False)
             text = ' '.join([word[1][0] for line in result[0] for word in line if len(word) >= 2])
-
-            # Cleanup
-            os.remove(filepath)
+            
             return render_template('index.html', text=text)
 
         except Exception as e:
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            return render_template('index.html', error="OCR processing failed")
+            return render_template('index.html', error="Processing error")
 
     return render_template('index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, threaded=False)
+    app.run(host='0.0.0.0', port=port)
