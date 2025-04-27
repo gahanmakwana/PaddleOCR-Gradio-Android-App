@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ocr-app
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: PORT
+        value: 5000

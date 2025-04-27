@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OCR App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>📝 OCR Text Recognition</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label for="file-upload" class="custom-file-upload">
+                📂 Choose an image
+            </label>
+            <input id="file-upload" type="file" name="file" onchange="this.form.submit()" />
+        </form>
+
+        {% if filename %}
+        <div class="image-preview">
+            <h2>🖼 Uploaded Image:</h2>
+            <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image">
+        </div>
+        {% endif %}
+
+        {% if text %}
+        <div class="output-box">
+            <h2>📋 Extracted Text:</h2>
+            <p>{{ text }}</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

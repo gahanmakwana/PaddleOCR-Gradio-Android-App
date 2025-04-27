@@ -1,0 +1,10 @@
+shapely==2.1.0
+scikit-image==0.18.3
+imgaug==0.4.0
+pyclipper
+lmdb
+tqdm
+numpy
+visualdl
+python-Levenshtein
+opencv-contrib-python==4.5.5.62
