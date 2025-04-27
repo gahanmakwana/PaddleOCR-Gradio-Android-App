@@ -49,77 +49,68 @@ from flask import Flask, render_template, request, send_from_directory
 from paddleocr import PaddleOCR
 import os
 import time
+import logging
 
 app = Flask(__name__)
 
+# Configure minimal logging
+logging.basicConfig(level=logging.WARNING)
+
 # Upload folder
 UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Initialize OCR with error handling and optimized settings
-try:
-    ocr = PaddleOCR(
-        use_angle_cls=True,
+# Lightweight OCR initialization
+def get_ocr():
+    return PaddleOCR(
         lang='en',
-        use_gpu=False,  # Disable GPU on Render
-        rec_model_dir='paddle_models/rec',  # Cache models
-        det_model_dir='paddle_models/det',
-        cls_model_dir='paddle_models/cls',
+        use_angle_cls=False,  # Disable angle classifier to save memory
+        use_gpu=False,
         enable_mkldnn=True,  # CPU optimization
-        thread_num=2  # Limit threads to prevent OOM
+        rec_batch_num=1,     # Process one line at a time
+        det_limit_side_len=480,  # Smaller image size
+        thread_num=1         # Critical for free tier
     )
-except Exception as e:
-    print(f"OCR initialization failed: {str(e)}")
-    ocr = None
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    text = None
-    filename = None
-    error = None
-    
     if request.method == 'POST':
         file = request.files.get('file')
         if not file or file.filename == '':
             return render_template('index.html', error="No file selected")
 
         try:
-            # Save file with timestamp to prevent overwrites
-            timestamp = str(int(time.time()))
-            safe_filename = f"{timestamp}_{file.filename}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], safe_filename)
+            # Verify file size (<500KB)
+            file.seek(0, os.SEEK_END)
+            if file.tell() > 500000:
+                return render_template('index.html', error="File too large (max 500KB)")
+            file.seek(0)
+
+            # Save with timestamp
+            filename = f"{int(time.time())}_{file.filename}"
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
             file.save(filepath)
 
-            # Check OCR initialization
-            if not ocr:
-                raise Exception("OCR engine not available")
-
-            # Run OCR with timeout safeguard
-            start_time = time.time()
-            result = ocr.ocr(filepath, cls=True)
+            # Initialize OCR per-request (avoids memory buildup)
+            ocr = get_ocr()
             
-            # Process results
-            extracted_text = ""
-            if result and len(result) > 0:
-                for line in result[0]:  # Note: result[0] contains the actual OCR data
-                    if line and len(line) >= 2:  # Check if line has text information
-                        extracted_text += line[1][0] + " "
+            # Fast OCR with small image
+            result = ocr.ocr(filepath, cls=False)[0]  # [0] gets first batch
+            text = ' '.join([word[1][0] for word in result if len(word) >= 2])
 
-            text = extracted_text.strip()
-            filename = safe_filename
+            return render_template('index.html', text=text, filename=filename)
 
         except Exception as e:
-            error = f"Error processing file: {str(e)}"
-            print(error)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            return render_template('index.html', error=f"Error: {str(e)}")
 
-    return render_template('index.html', text=text, filename=filename, error=error)
+    return render_template('index.html')
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, threaded=False)
