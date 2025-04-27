@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OCR App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container mt-5">
@@ -32,13 +33,15 @@
             <pre>{{ text }}</pre>
         {% endif %}
 
+        <!-- Display Image -->
         {% if filename %}
             <h4>Uploaded Image: {{ filename }}</h4>
-            <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image" class="img-fluid mt-3">
+            <div class="image-preview">
+                <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image">
+            </div>
         {% endif %}
     </div>
 
-    <!-- Optional: Bootstrap JavaScript for interaction (such as form validation) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
