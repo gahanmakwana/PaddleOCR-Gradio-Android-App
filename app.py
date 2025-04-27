@@ -1,55 +1,48 @@
+# app.py
+from flask import Flask, render_template, request, redirect, flash, url_for
 import os
-from flask import Flask, render_template, request, send_from_directory
-from werkzeug.utils import secure_filename
 from paddleocr import PaddleOCR
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-
-# Configuration
-UPLOAD_FOLDER = 'uploads'
+app.secret_key = os.environ.get('SECRET_KEY', 'change-this')  # Replace in production
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize PaddleOCR (CPU mode)
-ocr = PaddleOCR(use_angle_cls=True, lang='en')
+# Initialize PaddleOCR once (CPU mode, English; angle_cls=False speeds up simple text)
+ocr = PaddleOCR(use_angle_cls=False, use_gpu=False, lang='en')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    filename = None
     extracted_text = None
-    error = None
+    image_file = None
 
     if request.method == 'POST':
-        file = request.files.get('image')
-        if not file or file.filename == '' or not allowed_file(file.filename):
-            error = "Please upload a valid image file (png/jpg/jpeg/gif)."
-        else:
-            # Save the uploaded file
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+        # Check file in request
+        if 'image' not in request.files:
+            flash('No file part in the request.')
+            return redirect(request.url)
+        file = request.files['image']
+        if file.filename == '':
+            flash('No image selected.')
+            return redirect(request.url)
 
-            # Run OCR on the saved image
-            result = ocr.ocr(filepath, cls=True)
-            # Flatten nested results if needed
-            if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
-                result = result[0]
-            # Extract text lines
-            lines = [line[1][0] for line in result]
-            extracted_text = "\n".join(lines) if lines else "No text detected."
+        # Save uploaded file
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
 
-    return render_template('index.html', filename=filename,
-                           extracted_text=extracted_text, error=error)
+        # Run PaddleOCR on the saved image (CPU mode)
+        result = ocr.ocr(file_path, cls=False)
+        # Collect recognized text lines
+        lines = []
+        for res_line in result:
+            for box, (txt, prob) in res_line:
+                lines.append(txt)
+        extracted_text = "\n".join(lines)
+        image_file = filename
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-if __name__ == '__main__':
-    # Use the PORT environment variable if provided by Render, else 5000
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    return render_template('index.html', extracted_text=extracted_text, image_file=image_file)

@@ -103,70 +103,76 @@ button:hover {
   transform: translate(-50%, -50%);
   z-index: 1000;
 } */
+/* static/style.css */
 body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-  }
-  
-  .container {
-    background: #fff;
-    padding: 30px 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    max-width: 600px;
-    width: 100%;
-    animation: fadeIn 1s ease-in;
-  }
-  
-  h1 {
-    margin-bottom: 20px;
+    background: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
     color: #333;
-    font-weight: 600;
+    margin: 0;
+    padding: 0;
   }
-  
-  .upload-form {
+  .container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  h1, h2 {
+    color: #444;
+    margin-bottom: 10px;
+  }
+  p {
+    color: #666;
+  }
+  form {
+    margin-top: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 10px;
   }
-  
-  #spinner {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
+  input[type="file"] {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
-  
-  .preview img, #result-img {
-    max-width: 100%;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    margin-top: 10px;
+  button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
   }
-  
-  .output, #extracted-text {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: left;
+  button:hover {
+    background-color: #0056b3;
+  }
+  .result, .image-preview {
+    margin-top: 20px;
+    padding: 10px;
+    border-top: 1px solid #e1e1e1;
+  }
+  .result pre {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
     white-space: pre-wrap;
-    margin-top: 10px;
   }
-  
-  .error {
-    color: red;
-    font-weight: bold;
-    margin-top: 10px;
+  .flashes {
+    list-style: none;
+    padding: 10px;
+    background: #ffe0e0;
+    border: 1px solid #ffb3b3;
+    border-radius: 4px;
+    color: #a94442;
   }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  .flashes li {
+    margin: 5px 0;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
   }
   
