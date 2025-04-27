@@ -1,9 +1,5 @@
-# import sys
-# import os
-# sys.path.insert(0, os.path.abspath("C:\Users\KRUNAL\Desktop\my_ocr_project\PaddleOCR"))
-
-from flask import Flask, render_template, request, send_from_directory
 import os
+from flask import Flask, render_template, request, send_from_directory
 from paddleocr import PaddleOCR
 
 app = Flask(__name__)
@@ -39,4 +35,6 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Corrected indentation here
+    # Run the app, binding to all IP addresses and the correct port
+    app.run(host="0.0.0.0", port=port)
