@@ -10,4 +10,4 @@ tqdm
 numpy==1.24.3
 visualdl
 python-Levenshtein
-opencv-contrib-python==4.5.5.62
+opencv-contrib-python==4.8.0.74
