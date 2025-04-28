@@ -59,3 +59,5 @@ def index():
         image_file = filename
 
     return render_template('index.html', extracted_text=extracted_text, image_file=image_file)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
