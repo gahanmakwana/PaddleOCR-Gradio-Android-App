@@ -7,6 +7,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -19,8 +20,8 @@ COPY . .
 # Set environment variable for port
 ENV PORT=8080
 
-# Expose the port (optional, Railway handles it)
+# Expose the port
 EXPOSE 8080
 
-# Start the app using Gunicorn, binding to 0.0.0.0:$PORT
+# Start the app
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
