@@ -1,7 +1,5 @@
-# app.py
 from flask import Flask, render_template, request, redirect, flash, url_for
 import os
-from paddleocr import PaddleOCR
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -12,28 +10,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize PaddleOCR once (CPU mode, English; angle_cls=False speeds up simple text)
-import os
-from paddleocr import PaddleOCR
-
-# create /tmp/ocr_models directory if it doesn't exist
-os.makedirs('/tmp/ocr_models', exist_ok=True)
-
-ocr = PaddleOCR(
-    use_angle_cls=False,
-    use_gpu=False,
-    lang='en',
-    det_model_dir='/tmp/ocr_models/det',
-    rec_model_dir='/tmp/ocr_models/rec',
-    cls_model_dir='/tmp/ocr_models/cls'
-)
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     extracted_text = None
     image_file = None
 
     if request.method == 'POST':
+        # Initialize PaddleOCR inside the route (avoids memory use at app startup)
+        from paddleocr import PaddleOCR
+        ocr = PaddleOCR(use_angle_cls=False, use_gpu=False, lang='en')
+
         # Check file in request
         if 'image' not in request.files:
             flash('No file part in the request.')
@@ -59,5 +45,6 @@ def index():
         image_file = filename
 
     return render_template('index.html', extracted_text=extracted_text, image_file=image_file)
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
