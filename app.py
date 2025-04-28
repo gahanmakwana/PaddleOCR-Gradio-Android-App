@@ -1,52 +1,61 @@
+# app.py
+from flask import Flask, render_template, request, redirect, flash, url_for
 import os
-from flask import Flask, request, jsonify
 from paddleocr import PaddleOCR
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'change-this')  # Replace in production
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Global variable to hold the OCR instance
-ocr = None
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Function to initialize the OCR model
-def get_ocr():
-    global ocr
-    if ocr is None:
-        # Ensure the /tmp/ocr_models directory exists
-        os.makedirs('/tmp/ocr_models', exist_ok=True)
+# Initialize PaddleOCR once (CPU mode, English; angle_cls=False speeds up simple text)
+import os
+from paddleocr import PaddleOCR
 
-        # Initialize the OCR model
-        ocr = PaddleOCR(
-            use_angle_cls=False,
-            use_gpu=False,
-            lang='en',
-            det_model_dir='/tmp/ocr_models/det',
-            rec_model_dir='/tmp/ocr_models/rec',
-            cls_model_dir='/tmp/ocr_models/cls'
-        )
-    return ocr
+# create /tmp/ocr_models directory if it doesn't exist
+os.makedirs('/tmp/ocr_models', exist_ok=True)
 
-@app.route('/')
-def home():
-    return "OCR App is running!"
+ocr = PaddleOCR(
+    use_angle_cls=False,
+    use_gpu=False,
+    lang='en',
+    det_model_dir='/tmp/ocr_models/det',
+    rec_model_dir='/tmp/ocr_models/rec',
+    cls_model_dir='/tmp/ocr_models/cls'
+)
 
-@app.route('/extract-text', methods=['POST'])
-def extract_text():
-    # Get OCR model
-    ocr_model = get_ocr()
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    extracted_text = None
+    image_file = None
 
-    # Get the image file from the request
-    image_file = request.files.get('image')
-    if image_file:
-        # Perform OCR on the uploaded image
-        result = ocr_model.ocr(image_file, cls=False)
+    if request.method == 'POST':
+        # Check file in request
+        if 'image' not in request.files:
+            flash('No file part in the request.')
+            return redirect(request.url)
+        file = request.files['image']
+        if file.filename == '':
+            flash('No image selected.')
+            return redirect(request.url)
 
-        # Extract text from OCR result
-        text = '\n'.join([line[1][0] for line in result[0]])
+        # Save uploaded file
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
 
-        return jsonify({"extracted_text": text})
+        # Run PaddleOCR on the saved image (CPU mode)
+        result = ocr.ocr(file_path, cls=False)
+        # Collect recognized text lines
+        lines = []
+        for res_line in result:
+            for box, (txt, prob) in res_line:
+                lines.append(txt)
+        extracted_text = "\n".join(lines)
+        image_file = filename
 
-    return jsonify({"error": "No image uploaded!"}), 400
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, threaded=False)
+    return render_template('index.html', extracted_text=extracted_text, image_file=image_file)
