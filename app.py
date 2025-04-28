@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, url_for
 import os
 from werkzeug.utils import secure_filename
+from paddleocr import PaddleOCR
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change-this')  # Replace in production
@@ -10,16 +11,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Initialize PaddleOCR once at the start (use CPU mode)
+ocr = PaddleOCR(use_angle_cls=False, use_gpu=False, lang='en')
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     extracted_text = None
     image_file = None
 
     if request.method == 'POST':
-        # Initialize PaddleOCR inside the route (avoids memory use at app startup)
-        from paddleocr import PaddleOCR
-        ocr = PaddleOCR(use_angle_cls=False, use_gpu=False, lang='en')
-
         # Check file in request
         if 'image' not in request.files:
             flash('No file part in the request.')
