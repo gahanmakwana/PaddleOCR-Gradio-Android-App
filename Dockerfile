@@ -1,28 +1,26 @@
-# Use a slim Python image
+# Use official Python image
 FROM python:3.9-slim
 
-# Install OS-level dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libglib2.0-0 \
-    libsm6 \
-    libxrender1 \
-    libxext6 \
-    libgl1 \
-    python3-setuptools \
- && rm -rf /var/lib/apt/lists/*
-
+# Set working directory
 WORKDIR /app
 
-# Copy and install dependencies
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the app
+# Copy app files
 COPY . .
 
-# Set environment port (Railway uses it)
+# Set environment variable for port
 ENV PORT=8080
 
-# Start the app
+# Expose the port (optional, Railway handles it)
+EXPOSE 8080
+
+# Start the app using Gunicorn, binding to 0.0.0.0:$PORT
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
