@@ -1,5 +1,15 @@
-Flask>=2.0.0
-gunicorn>=20.1.0
-paddleocr>=2.0.1
-paddlepaddle>=2.0.0
+# Core OCR and ML Framework
+paddleocr>=2.7.0    # Or your preferred version
+paddlepaddle>=2.6.0  # Or your preferred version, ensure compatibility with paddleocr
+
+# Image Processing
 opencv-python-headless>=4.8.0
+Pillow>=9.0.0
+
+# Web Application Interface
+gradio>=4.0.0       # Using Gradio instead of Flask/Gunicorn for Hugging Face Spaces
+
+# Utilities
+numpy>=1.20.0
+
+# Add any other specific utility libraries you might need

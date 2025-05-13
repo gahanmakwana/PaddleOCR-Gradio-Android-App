@@ -1,8 +1,36 @@
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-uploads/
+*.py[cod]
+*$py.class
+*.egg-info/
 .env
+.venv
+env/
 venv/
+ENV/
+env.bak/
+venv.bak/
+
+# PaddleOCR / PaddlePaddle cache (if any created locally, not strictly needed for repo)
+.paddlehub/
+.paddleocr/
+
+# IDE / OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+
+# Local model downloads if you accidentally commit them outside the designated 'paddleocr_models' dir
+# (The 'paddleocr_models' directory itself SHOULD be committed)
+
+# If you use Git LFS for models (optional, if models are very large)
+# .gitattributes # This file itself should be committed if LFS is used
+# *.pdparams # Example if you track these with LFS
+
+# Output files
+result.jpg
+result.png
