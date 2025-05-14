@@ -25,10 +25,6 @@ This project demonstrates an Optical Character Recognition (OCR) system. It cons
 
 The Android application embeds the live web application hosted on Hugging Face Spaces. When an image is uploaded through the Android app, it is processed by the PaddleOCR engine running on the Hugging Face Space server, and the results are displayed back within the Android app's WebView.
 
-## Video Demonstration
-
-[Link to your video demonstration on GitHub or elsewhere, once you've made it]
-
 ## Setup (Optional - for developers)
 
 ### Web Application (Local)
