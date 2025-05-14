@@ -1,36 +1,95 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+    # Existing Python/Gradio ignores (keep these)
+    __pycache__/
+    *.py[cod]
+    *$py.class
+    *.egg
+    *.egg-info/
+    .env
+    .venv
+    env/
+    venv/
+    ENV/
+    env.bak/
+    venv.bak/
 
-# PaddleOCR / PaddlePaddle cache (if any created locally, not strictly needed for repo)
-.paddlehub/
-.paddleocr/
+    # IDE / OS specific (keep these)
+    .vscode/
+    .idea/ # Android Studio's .idea folder should usually be ignored at the root if the Android project is a subfolder
+    *.swp
+    *.swo
+    *~
+    .DS_Store
+    Thumbs.db
 
-# IDE / OS files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
+    # Output files from testing (keep these)
+    result.jpg
+    result.png
 
-# Local model downloads if you accidentally commit them outside the designated 'paddleocr_models' dir
-# (The 'paddleocr_models' directory itself SHOULD be committed)
+    # LFS files are pointers, the actual content is stored elsewhere
+    # but the pointer files themselves should be committed.
 
-# If you use Git LFS for models (optional, if models are very large)
-# .gitattributes # This file itself should be committed if LFS is used
-# *.pdparams # Example if you track these with LFS
+    # --- Android Studio / Gradle specific ignores (ADD THESE) ---
+    # Generated files
+    *.apk
+    *.aab
+    *.ap_
+    *.a_
+    *.aar
 
-# Output files
-result.jpg
-result.png
+    # Files for the ART/Dalvik VM
+    *.dex
+
+    # Built application files
+    build/
+    /*/build/
+
+    # Local configuration files (sdk path, etc)
+    local.properties
+
+    # Log Files
+    *.log
+
+    # Android Studio Navigation editor files
+    .navigation/
+
+    # Android Studio captures folder
+    captures/
+
+    # Android Studio profiler data files
+    *.hprof
+
+    # IntelliJ
+    *.iml
+    # (If your Android project folder 'MyOCRApplication' has its own .idea,
+    # and you want to ignore that specifically, you might add MyOCRApplication/.idea/
+    # but usually the root .idea/ is enough if the Android project is a module within it)
+
+    # Gradle
+    .gradle/
+    gradle-app.setting
+    !gradle-wrapper.jar # Usually, the wrapper jar is committed
+    !gradle/wrapper/gradle-wrapper.properties
+
+    # Keystore files (VERY IMPORTANT - DO NOT COMMIT YOUR KEYSTORE)
+    *.jks
+    *.keystore
+
+    # Google Services (if you were using Firebase, etc.)
+    google-services.json # If it contains sensitive info and is not generic
+
+    # Lint
+    lint/reports/
+    lint/intermediates/
+    lint/generated/
+
+    # C/C++
+    .cxx/
+    /*/build/generated/
+    /*/build/intermediates/
+    /*/build/kotlin/
+    /*/build/outputs/
+    /*/build/tmp/
+
+    # Misc
+    *.lock
+    
