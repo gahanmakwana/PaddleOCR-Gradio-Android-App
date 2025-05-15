@@ -92,4 +92,7 @@
 
     # Misc
     *.lock
-    
+    __pycache__/
+*.pyc
+tts_outputs/
+# Any other local files/folders you don't want to track

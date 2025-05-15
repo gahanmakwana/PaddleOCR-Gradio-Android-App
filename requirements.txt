@@ -11,5 +11,5 @@ gradio>=4.0.0       # Using Gradio instead of Flask/Gunicorn for Hugging Face Sp
 
 # Utilities
 numpy>=1.20.0
-
+gTTS
 # Add any other specific utility libraries you might need
